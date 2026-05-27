@@ -7,6 +7,11 @@ function formatStatus(status) {
   return status ? status.charAt(0).toUpperCase() + status.slice(1) : "New";
 }
 
+function formatPayoutStatus(status) {
+  if (!status) return "Not Earned";
+  return status.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 export default function Recruiting() {
   const [candidates, setCandidates] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
@@ -20,7 +25,7 @@ export default function Recruiting() {
     const { data, error } = await supabase
       .from("candidate_applications")
       .select(
-        "id, first_name, last_name, email, phone, position_title, status, created_at, resume_path, source, notes, recruiter"
+        "id, first_name, last_name, email, phone, position_title, status, created_at, resume_path, source, notes, recruiter, referred_by, referral_payout_amount, referral_payout_status"
       )
       .order("created_at", { ascending: false });
 
@@ -36,9 +41,15 @@ export default function Recruiting() {
   }
 
   async function updateStatus(id, status) {
+    const updates = { status };
+
+    if (status === "hired") {
+      updates.referral_payout_status = "earned";
+    }
+
     const { error } = await supabase
       .from("candidate_applications")
-      .update({ status })
+      .update(updates)
       .eq("id", id);
 
     if (error) {
@@ -46,14 +57,26 @@ export default function Recruiting() {
       return;
     }
 
+    await supabase.from("candidate_activity").insert([
+      {
+        candidate_id: id,
+        activity_type: "status_updated",
+        activity_note:
+          status === "hired"
+            ? "Candidate marked hired. Referral payout earned."
+            : `Candidate status changed to ${status}.`,
+        created_by: "Recruiter",
+      },
+    ]);
+
     setCandidates((prev) =>
       prev.map((candidate) =>
-        candidate.id === id ? { ...candidate, status } : candidate
+        candidate.id === id ? { ...candidate, ...updates } : candidate
       )
     );
 
     setSelectedCandidate((prev) =>
-      prev && prev.id === id ? { ...prev, status } : prev
+      prev && prev.id === id ? { ...prev, ...updates } : prev
     );
   }
 
@@ -63,6 +86,10 @@ export default function Recruiting() {
 
   const interviewingCount = candidates.filter(
     (candidate) => candidate.status === "interviewing"
+  ).length;
+
+  const earnedPayouts = candidates.filter(
+    (candidate) => candidate.referral_payout_status === "earned"
   ).length;
 
   return (
@@ -101,9 +128,9 @@ export default function Recruiting() {
         </div>
 
         <div className="card stat-card">
-          <p>Source</p>
-          <h3>Join-Orion</h3>
-          <span>Applicant intake funnel + manual imports</span>
+          <p>Earned Payouts</p>
+          <h3>{loading ? "..." : earnedPayouts}</h3>
+          <span>Referral payouts triggered by hire status</span>
         </div>
       </section>
 
@@ -133,7 +160,9 @@ export default function Recruiting() {
                   <th>Phone</th>
                   <th>Role</th>
                   <th>Source</th>
+                  <th>Referred By</th>
                   <th>Status</th>
+                  <th>Payout</th>
                   <th>Resume</th>
                   <th>Recruiter</th>
                   <th>Applied</th>
@@ -155,6 +184,7 @@ export default function Recruiting() {
                     <td onClick={() => setSelectedCandidate(candidate)}>{candidate.phone || "-"}</td>
                     <td onClick={() => setSelectedCandidate(candidate)}>{candidate.position_title || "-"}</td>
                     <td onClick={() => setSelectedCandidate(candidate)}>{candidate.source || "Join-Orion"}</td>
+                    <td onClick={() => setSelectedCandidate(candidate)}>{candidate.referred_by || "-"}</td>
 
                     <td>
                       <select
@@ -168,6 +198,18 @@ export default function Recruiting() {
                           </option>
                         ))}
                       </select>
+                    </td>
+
+                    <td onClick={() => setSelectedCandidate(candidate)}>
+                      <span
+                        className={
+                          candidate.referral_payout_status === "earned"
+                            ? "status-pill"
+                            : "status-pill payout"
+                        }
+                      >
+                        {formatPayoutStatus(candidate.referral_payout_status)}
+                      </span>
                     </td>
 
                     <td onClick={() => setSelectedCandidate(candidate)}>
@@ -235,6 +277,8 @@ function ManualImportForm({ onImported }) {
     position_title: "",
     source: "Indeed",
     recruiter: "",
+    referred_by: "",
+    referral_payout_amount: 300,
     notes: "",
   });
 
@@ -257,6 +301,9 @@ function ManualImportForm({ onImported }) {
       position_title: form.position_title.trim(),
       source: form.source,
       recruiter: form.recruiter.trim() || null,
+      referred_by: form.referred_by.trim() || null,
+      referral_payout_amount: Number(form.referral_payout_amount) || 0,
+      referral_payout_status: "not_earned",
       notes: form.notes.trim() || null,
       status: "new",
     };
@@ -277,6 +324,8 @@ function ManualImportForm({ onImported }) {
       position_title: "",
       source: "Indeed",
       recruiter: "",
+      referred_by: "",
+      referral_payout_amount: 300,
       notes: "",
     });
 
@@ -333,15 +382,38 @@ function ManualImportForm({ onImported }) {
         </label>
       </div>
 
-      <label>
-        Recruiter
-        <input
-          name="recruiter"
-          value={form.recruiter}
-          onChange={updateField}
-          placeholder="Assigned recruiter"
-        />
-      </label>
+      <div className="grid stats-grid">
+        <label>
+          Recruiter
+          <input
+            name="recruiter"
+            value={form.recruiter}
+            onChange={updateField}
+            placeholder="Assigned recruiter"
+          />
+        </label>
+
+        <label>
+          Referred By
+          <input
+            name="referred_by"
+            value={form.referred_by}
+            onChange={updateField}
+            placeholder="Name of person who referred candidate"
+          />
+        </label>
+
+        <label>
+          Referral Payout Amount
+          <input
+            type="number"
+            name="referral_payout_amount"
+            value={form.referral_payout_amount}
+            onChange={updateField}
+            placeholder="300"
+          />
+        </label>
+      </div>
 
       <label>
         Notes
@@ -445,6 +517,19 @@ function CandidateDrawer({ candidate, onClose, onStatusChange }) {
           <div className="drawer-field">
             <span>Recruiter</span>
             <strong>{candidate.recruiter || "Unassigned"}</strong>
+          </div>
+
+          <div className="drawer-field">
+            <span>Referred By</span>
+            <strong>{candidate.referred_by || "-"}</strong>
+          </div>
+
+          <div className="drawer-field">
+            <span>Referral Payout</span>
+            <strong>
+              ${candidate.referral_payout_amount || 0} —{" "}
+              {formatPayoutStatus(candidate.referral_payout_status)}
+            </strong>
           </div>
 
           <div className="drawer-field">
