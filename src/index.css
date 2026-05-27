@@ -211,3 +211,255 @@ nav {
     flex-direction: column;
   }
 }
+
+.form-card {
+  display: grid;
+  gap: 14px;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  color: #dbe3f3;
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.28);
+  color: #f6f3ea;
+  outline: none;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(214, 176, 91, 0.7);
+}
+
+.payout-rules {
+  display: grid;
+  gap: 14px;
+}
+
+.payout-rules div {
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(214, 176, 91, 0.1);
+  border: 1px solid rgba(214, 176, 91, 0.22);
+}
+
+.payout-rules strong {
+  display: block;
+  font-size: 30px;
+  color: #d6b05b;
+}
+
+.payout-rules span {
+  color: #dbe3f3;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 14px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+th {
+  color: #aeb7c8;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+td {
+  color: #f6f3ea;
+}
+
+.status-pill {
+  display: inline-flex;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(143, 240, 210, 0.1);
+  color: #8ff0d2;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.status-pill.payout {
+  background: rgba(214, 176, 91, 0.12);
+  color: #d6b05b;
+}
+.muted-small {
+  color: #aeb7c8;
+  font-size: 13px;
+}
+
+.table-select {
+  max-width: 160px;
+  padding: 9px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.score-pill {
+  display: inline-flex;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(143, 240, 210, 0.1);
+  color: #8ff0d2;
+  font-weight: 900;
+}
+
+.mini-btn {
+  border: 1px solid rgba(214, 176, 91, 0.35);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(214, 176, 91, 0.1);
+  color: #f6f3ea;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.mini-btn:hover {
+  background: rgba(214, 176, 91, 0.2);
+}
+.clickable-row td {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(6px);
+  z-index: 50;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.candidate-drawer {
+  width: min(560px, 100%);
+  height: 100vh;
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at top left, rgba(214, 176, 91, 0.18), transparent 36%),
+    #0b0f18;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  padding: 28px;
+  box-shadow: -30px 0 80px rgba(0,0,0,0.45);
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.drawer-header h2 {
+  margin: 0 0 6px;
+  font-size: 34px;
+}
+
+.drawer-close {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: #f6f3ea;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.drawer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.drawer-field {
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.045);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.drawer-field span {
+  display: block;
+  color: #aeb7c8;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.drawer-field strong {
+  color: #f6f3ea;
+  overflow-wrap: anywhere;
+}
+
+.drawer-status {
+  margin: 18px 0;
+}
+
+.drawer-notes {
+  border: 1px solid rgba(143, 240, 210, 0.16);
+  background: rgba(143, 240, 210, 0.06);
+  border-radius: 20px;
+  padding: 18px;
+  margin: 20px 0;
+}
+
+.drawer-notes h3 {
+  margin: 0 0 8px;
+}
+
+.drawer-notes p {
+  color: #dbe3f3;
+  line-height: 1.6;
+}
+
+.drawer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 700px) {
+  .drawer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .candidate-drawer {
+    padding: 22px;
+  }
+}
