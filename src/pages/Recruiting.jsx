@@ -143,6 +143,66 @@ export default function Recruiting() {
 
       <section className="card">
         <div className="section-header">
+          <h3>Kanban Pipeline Board</h3>
+          <p>Move candidates through the hiring process visually.</p>
+        </div>
+
+        <div className="kanban-board">
+          {statuses.map((status) => (
+            <div className="kanban-column" key={status}>
+              <div className="kanban-column-header">
+                <h4>{formatStatus(status)}</h4>
+                <span>
+                  {candidates.filter((candidate) => (candidate.status || "new") === status).length}
+                </span>
+              </div>
+
+              <div className="kanban-list">
+                {candidates
+                  .filter((candidate) => (candidate.status || "new") === status)
+                  .map((candidate) => (
+                    <div
+                      className="kanban-card"
+                      key={candidate.id}
+                      onClick={() => setSelectedCandidate(candidate)}
+                    >
+                      <strong>
+                        {candidate.first_name} {candidate.last_name}
+                      </strong>
+
+                      <p>{candidate.position_title || "No role listed"}</p>
+
+                      <span>{candidate.source || "Join-Orion"}</span>
+
+                      {candidate.referred_by && (
+                        <small>Referred by {candidate.referred_by}</small>
+                      )}
+
+                      <button
+                        className="mini-btn"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          const currentIndex = statuses.indexOf(candidate.status || "new");
+                          const nextStatus = statuses[currentIndex + 1];
+
+                          if (nextStatus) {
+                            updateStatus(candidate.id, nextStatus);
+                          }
+                        }}
+                        disabled={(candidate.status || "new") === "rejected"}
+                      >
+                        Move Forward
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="card">
+        <div className="section-header">
           <h3>Candidate Applications</h3>
           <p>Click any candidate to open the profile drawer.</p>
         </div>
@@ -251,7 +311,7 @@ export default function Recruiting() {
           {statuses.map((status) => (
             <div key={status}>
               {formatStatus(status)}:{" "}
-              {candidates.filter((candidate) => candidate.status === status).length}
+              {candidates.filter((candidate) => (candidate.status || "new") === status).length}
             </div>
           ))}
         </div>

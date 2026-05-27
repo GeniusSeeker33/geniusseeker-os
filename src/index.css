@@ -534,3 +534,78 @@ td {
   display: grid;
   gap: 14px;
 }
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(220px, 1fr));
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.kanban-column {
+  min-height: 300px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  background: rgba(0,0,0,0.18);
+  padding: 14px;
+}
+
+.kanban-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.kanban-column-header h4 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.kanban-column-header span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(214,176,91,.16);
+  color: #d6b05b;
+  font-weight: 900;
+}
+
+.kanban-list {
+  display: grid;
+  gap: 12px;
+}
+
+.kanban-card {
+  border: 1px solid rgba(143,240,210,.16);
+  border-radius: 18px;
+  background: rgba(143,240,210,.06);
+  padding: 14px;
+  cursor: pointer;
+}
+
+.kanban-card:hover {
+  background: rgba(143,240,210,.1);
+}
+
+.kanban-card strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.kanban-card p {
+  margin: 0 0 8px;
+  color: #dbe3f3;
+  font-size: 13px;
+}
+
+.kanban-card span,
+.kanban-card small {
+  display: block;
+  color: #aeb7c8;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
