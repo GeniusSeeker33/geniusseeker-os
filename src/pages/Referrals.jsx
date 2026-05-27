@@ -1,226 +1,185 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 
-const initialReferrals = [
-  {
-    id: 1,
-    referrer: "Desiree Thayer",
-    candidate: "Alex Morgan",
-    email: "alex@example.com",
-    role: "Orion Sales Representative",
-    status: "Interviewing",
-    payout: "$300",
-    payoutStatus: "Pending",
-  },
-  {
-    id: 2,
-    referrer: "Sarah H.",
-    candidate: "Jordan Blake",
-    email: "jordan@example.com",
-    role: "Remote Recruiter",
-    status: "Submitted",
-    payout: "$150",
-    payoutStatus: "Not Earned Yet",
-  },
-];
+function formatPayoutStatus(status) {
+  if (!status) return "Not Earned";
+  return status.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
 export default function Referrals() {
-  const [referrals, setReferrals] = useState(initialReferrals);
+  const [referrals, setReferrals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
-  const [form, setForm] = useState({
-    referrer: "",
-    candidate: "",
-    email: "",
-    phone: "",
-    role: "",
-    notes: "",
-  });
+  async function fetchReferrals() {
+    setLoading(true);
+    setLoadError("");
 
-  function handleChange(event) {
-    const { name, value } = event.target;
+    const { data, error } = await supabase
+      .from("candidate_applications")
+      .select(
+        "id, first_name, last_name, email, phone, position_title, status, created_at, source, recruiter, referred_by, referral_payout_amount, referral_payout_status"
+      )
+      .not("referred_by", "is", null)
+      .order("created_at", { ascending: false });
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (error) {
+      console.error("Referral fetch error:", error);
+      setLoadError(error.message);
+      setReferrals([]);
+    } else {
+      setReferrals(data || []);
+    }
+
+    setLoading(false);
   }
 
-  function handleSubmit(event) {
-    event.preventDefault();
+  useEffect(() => {
+    fetchReferrals();
+  }, []);
 
-    const newReferral = {
-      id: Date.now(),
-      referrer: form.referrer,
-      candidate: form.candidate,
-      email: form.email,
-      role: form.role,
-      status: "Submitted",
-      payout: "$300",
-      payoutStatus: "Not Earned Yet",
-    };
+  const earned = referrals.filter((item) => item.referral_payout_status === "earned");
+  const pending = referrals.filter((item) => item.referral_payout_status !== "earned");
 
-    setReferrals((prev) => [newReferral, ...prev]);
+  const earnedTotal = earned.reduce(
+    (sum, item) => sum + Number(item.referral_payout_amount || 0),
+    0
+  );
 
-    setForm({
-      referrer: "",
-      candidate: "",
-      email: "",
-      phone: "",
-      role: "",
-      notes: "",
-    });
-  }
+  const pendingTotal = pending.reduce(
+    (sum, item) => sum + Number(item.referral_payout_amount || 0),
+    0
+  );
 
   return (
     <>
       <header className="topbar">
         <div>
           <p className="eyebrow">Referral Wallet</p>
-          <h2>Track who referred talent, where they are in the pipeline, and what payout is owed.</h2>
+          <h2>Track referrals, candidate status, and payout eligibility.</h2>
         </div>
+
+        <button className="primary-btn" onClick={fetchReferrals}>
+          Refresh Referrals
+        </button>
       </header>
 
-      <section className="content-grid">
-        <form className="card form-card" onSubmit={handleSubmit}>
-          <div className="section-header">
-            <h3>Add Referral</h3>
-            <p>Start the contribution trail the moment someone shares talent.</p>
-          </div>
-
-          <label>
-            Referrer Name
-            <input
-              name="referrer"
-              value={form.referrer}
-              onChange={handleChange}
-              placeholder="Who made the referral?"
-              required
-            />
-          </label>
-
-          <label>
-            Candidate Name
-            <input
-              name="candidate"
-              value={form.candidate}
-              onChange={handleChange}
-              placeholder="Candidate full name"
-              required
-            />
-          </label>
-
-          <label>
-            Candidate Email
-            <input
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="candidate@email.com"
-              required
-            />
-          </label>
-
-          <label>
-            Candidate Phone
-            <input
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              placeholder="Phone number"
-            />
-          </label>
-
-          <label>
-            Role Interested In
-            <select name="role" value={form.role} onChange={handleChange} required>
-              <option value="">Select role</option>
-              <option value="Orion Sales Representative">Orion Sales Representative</option>
-              <option value="Remote Recruiter">Remote Recruiter</option>
-              <option value="Marketing Ambassador">Marketing Ambassador</option>
-              <option value="Field Mission Rep">Field Mission Rep</option>
-            </select>
-          </label>
-
-          <label>
-            Notes
-            <textarea
-              name="notes"
-              value={form.notes}
-              onChange={handleChange}
-              placeholder="Relationship, strengths, context, or why they are a fit"
-            />
-          </label>
-
-          <button className="primary-btn" type="submit">
-            Submit Referral
-          </button>
-        </form>
-
-        <div className="card">
-          <div className="section-header">
-            <h3>Payout Rules</h3>
-            <p>This makes referral compensation visible and auditable.</p>
-          </div>
-
-          <div className="payout-rules">
-            <div>
-              <strong>$150</strong>
-              <span>Candidate screened</span>
-            </div>
-
-            <div>
-              <strong>$300</strong>
-              <span>Candidate hired</span>
-            </div>
-
-            <div>
-              <strong>$500+</strong>
-              <span>High-value or hard-to-fill role</span>
-            </div>
-          </div>
+      <section className="grid stats-grid">
+        <div className="card stat-card">
+          <p>Total Referrals</p>
+          <h3>{loading ? "..." : referrals.length}</h3>
+          <span>Candidates with a referred-by value</span>
         </div>
+
+        <div className="card stat-card">
+          <p>Earned Payouts</p>
+          <h3>${earnedTotal.toLocaleString()}</h3>
+          <span>Triggered when candidate is marked hired</span>
+        </div>
+
+        <div className="card stat-card">
+          <p>Pending Payouts</p>
+          <h3>${pendingTotal.toLocaleString()}</h3>
+          <span>Awaiting hire status</span>
+        </div>
+      </section>
+
+      {loadError && (
+        <section className="card error-card">
+          <h3>Could not load referrals</h3>
+          <p>{loadError}</p>
+        </section>
+      )}
+
+      <section className="card">
+        <div className="section-header">
+          <h3>Referral Payout Table</h3>
+          <p>Candidate referrals are pulled from the live recruiting pipeline.</p>
+        </div>
+
+        {loading ? (
+          <p className="muted-small">Loading referrals...</p>
+        ) : referrals.length === 0 ? (
+          <p className="muted-small">
+            No referrals found yet. Add a candidate in Recruiting with “Referred By” filled in.
+          </p>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Referred By</th>
+                  <th>Candidate</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Candidate Status</th>
+                  <th>Payout Amount</th>
+                  <th>Payout Status</th>
+                  <th>Recruiter</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {referrals.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.referred_by || "-"}</td>
+
+                    <td>
+                      <strong>
+                        {item.first_name} {item.last_name}
+                      </strong>
+                    </td>
+
+                    <td>{item.email || "-"}</td>
+                    <td>{item.position_title || "-"}</td>
+                    <td>
+                      <span className="status-pill">
+                        {item.status || "new"}
+                      </span>
+                    </td>
+
+                    <td>${Number(item.referral_payout_amount || 0).toLocaleString()}</td>
+
+                    <td>
+                      <span
+                        className={
+                          item.referral_payout_status === "earned"
+                            ? "status-pill"
+                            : "status-pill payout"
+                        }
+                      >
+                        {formatPayoutStatus(item.referral_payout_status)}
+                      </span>
+                    </td>
+
+                    <td>{item.recruiter || "-"}</td>
+
+                    <td>
+                      {item.created_at
+                        ? new Date(item.created_at).toLocaleDateString()
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       <section className="card">
         <div className="section-header">
-          <h3>Referral Table</h3>
-          <p>Pipeline visibility from referral submitted to payout earned.</p>
+          <h3>Referral Logic</h3>
+          <p>This is the first working version of the GeniusSeeker contribution economy.</p>
         </div>
 
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Referrer</th>
-                <th>Candidate</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Payout</th>
-                <th>Payout Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {referrals.map((referral) => (
-                <tr key={referral.id}>
-                  <td>{referral.referrer}</td>
-                  <td>{referral.candidate}</td>
-                  <td>{referral.email}</td>
-                  <td>{referral.role}</td>
-                  <td>
-                    <span className="status-pill">{referral.status}</span>
-                  </td>
-                  <td>{referral.payout}</td>
-                  <td>
-                    <span className="status-pill payout">
-                      {referral.payoutStatus}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="pipeline">
+          <div>Referral Added</div>
+          <div>Candidate Screened</div>
+          <div>Interviewing</div>
+          <div>Hired</div>
+          <div>Payout Earned</div>
         </div>
       </section>
     </>
