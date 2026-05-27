@@ -1,17 +1,31 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
-const navItems = [
-  { label: "Dashboard", path: "/" },
-  { label: "Recruiting", path: "/recruiting" },
-  { label: "Referrals", path: "/referrals" },
-  { label: "Sales Simulator", path: "/simulator" },
-  { label: "CRM", path: "/crm" },
-  { label: "Marketing Missions", path: "/missions" },
-  { label: "Leaderboard", path: "/leaderboard" },
-  { label: "Admin", path: "/admin" },
+const allNavItems = [
+  { label: "Dashboard", path: "/", roles: ["admin", "recruiter", "referrer"] },
+  { label: "Recruiting", path: "/recruiting", roles: ["admin", "recruiter"] },
+  { label: "Referrals", path: "/referrals", roles: ["admin", "recruiter", "referrer"] },
+  { label: "Sales Simulator", path: "/simulator", roles: ["admin", "recruiter"] },
+  { label: "CRM", path: "/crm", roles: ["admin", "recruiter"] },
+  { label: "Marketing Missions", path: "/missions", roles: ["admin", "recruiter", "referrer"] },
+  { label: "Leaderboard", path: "/leaderboard", roles: ["admin", "recruiter", "referrer"] },
+  { label: "Admin", path: "/admin", roles: ["admin"] },
 ];
 
 export default function MainLayout() {
+  const { user, role, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const visibleNavItems = allNavItems.filter((item) => {
+    if (!role) return item.roles.includes("referrer");
+    return item.roles.includes(role);
+  });
+
+  async function handleSignOut() {
+    await signOut();
+    navigate("/login", { replace: true });
+  }
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -25,10 +39,11 @@ export default function MainLayout() {
         </div>
 
         <nav>
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
+              end={item.path === "/"}
               className={({ isActive }) =>
                 isActive ? "nav-item active" : "nav-item"
               }
@@ -37,6 +52,18 @@ export default function MainLayout() {
             </NavLink>
           ))}
         </nav>
+
+        <div className="sidebar-user">
+          <div className="sidebar-user-meta">
+            <strong>{user?.email}</strong>
+            <span className={`role-badge role-${role || "none"}`}>
+              {role || "no role"}
+            </span>
+          </div>
+          <button type="button" className="mini-btn" onClick={handleSignOut}>
+            Sign out
+          </button>
+        </div>
       </aside>
 
       <main className="main">
