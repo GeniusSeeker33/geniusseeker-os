@@ -187,10 +187,7 @@ export default function Recruiting() {
                     </td>
 
                     <td>
-                      <button
-                        className="mini-btn"
-                        onClick={() => setSelectedCandidate(candidate)}
-                      >
+                      <button className="mini-btn" onClick={() => setSelectedCandidate(candidate)}>
                         View
                       </button>
                     </td>
@@ -364,6 +361,54 @@ function ManualImportForm({ onImported }) {
 }
 
 function CandidateDrawer({ candidate, onClose, onStatusChange }) {
+  const [notes, setNotes] = useState(candidate.notes || "");
+  const [saving, setSaving] = useState(false);
+
+  async function saveNotes() {
+    setSaving(true);
+
+    const { error } = await supabase
+      .from("candidate_applications")
+      .update({ notes })
+      .eq("id", candidate.id);
+
+    if (error) {
+      alert(error.message);
+      setSaving(false);
+      return;
+    }
+
+    await supabase.from("candidate_activity").insert([
+      {
+        candidate_id: candidate.id,
+        activity_type: "notes_updated",
+        activity_note: "Recruiter notes updated",
+        created_by: "Recruiter",
+      },
+    ]);
+
+    setSaving(false);
+    alert("Notes saved");
+  }
+
+  async function logActivity(type, note) {
+    const { error } = await supabase.from("candidate_activity").insert([
+      {
+        candidate_id: candidate.id,
+        activity_type: type,
+        activity_note: note,
+        created_by: "Recruiter",
+      },
+    ]);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert("Activity logged");
+  }
+
   return (
     <div className="drawer-overlay">
       <aside className="candidate-drawer">
@@ -410,9 +455,7 @@ function CandidateDrawer({ candidate, onClose, onStatusChange }) {
           <div className="drawer-field">
             <span>Applied</span>
             <strong>
-              {candidate.created_at
-                ? new Date(candidate.created_at).toLocaleString()
-                : "-"}
+              {candidate.created_at ? new Date(candidate.created_at).toLocaleString() : "-"}
             </strong>
           </div>
         </div>
@@ -433,15 +476,81 @@ function CandidateDrawer({ candidate, onClose, onStatusChange }) {
 
         <div className="drawer-notes">
           <h3>Recruiter Notes</h3>
-          <p>{candidate.notes || "No notes yet."}</p>
+
+          <textarea
+            value={notes}
+            onChange={(event) => setNotes(event.target.value)}
+            placeholder="Add recruiter notes..."
+          />
+
+          <button className="primary-btn" onClick={saveNotes} disabled={saving} style={{ marginTop: "12px" }}>
+            {saving ? "Saving..." : "Save Notes"}
+          </button>
         </div>
 
+        <ActivityFeed candidateId={candidate.id} />
+
         <div className="drawer-actions">
-          <button className="mini-btn">Log Call</button>
-          <button className="mini-btn">Schedule Interview</button>
-          <button className="primary-btn">Advance Candidate</button>
+          <button className="mini-btn" onClick={() => logActivity("phone_call", "Recruiter called candidate")}>
+            Log Call
+          </button>
+
+          <button className="mini-btn" onClick={() => logActivity("voicemail", "Left voicemail")}>
+            Left Voicemail
+          </button>
+
+          <button className="mini-btn" onClick={() => logActivity("interview", "Interview scheduled")}>
+            Schedule Interview
+          </button>
+
+          <button className="primary-btn" onClick={() => logActivity("advanced", "Candidate advanced")}>
+            Advance Candidate
+          </button>
         </div>
       </aside>
+    </div>
+  );
+}
+
+function ActivityFeed({ candidateId }) {
+  const [activities, setActivities] = useState([]);
+
+  useEffect(() => {
+    fetchActivities();
+  }, [candidateId]);
+
+  async function fetchActivities() {
+    const { data, error } = await supabase
+      .from("candidate_activity")
+      .select("*")
+      .eq("candidate_id", candidateId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setActivities(data || []);
+  }
+
+  return (
+    <div className="drawer-notes">
+      <h3>Activity Timeline</h3>
+
+      {activities.length === 0 ? (
+        <p>No activity yet.</p>
+      ) : (
+        <div className="activity-feed">
+          {activities.map((activity) => (
+            <div key={activity.id} className="activity-item">
+              <strong>{activity.activity_type}</strong>
+              <p>{activity.activity_note}</p>
+              <span>{new Date(activity.created_at).toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
