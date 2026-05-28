@@ -38,15 +38,21 @@ export default function Referrals() {
     fetchReferrals();
   }, []);
 
-  const earned = referrals.filter((item) => item.referral_payout_status === "earned");
-  const pending = referrals.filter((item) => item.referral_payout_status !== "earned");
+  const outstanding = referrals.filter(
+    (item) =>
+      item.referral_payout_status === "earned" ||
+      item.referral_payout_status === "requested"
+  );
+  const paid = referrals.filter(
+    (item) => item.referral_payout_status === "paid"
+  );
 
-  const earnedTotal = earned.reduce(
+  const outstandingTotal = outstanding.reduce(
     (sum, item) => sum + Number(item.referral_payout_amount || 0),
     0
   );
 
-  const pendingTotal = pending.reduce(
+  const paidTotal = paid.reduce(
     (sum, item) => sum + Number(item.referral_payout_amount || 0),
     0
   );
@@ -72,15 +78,15 @@ export default function Referrals() {
         </div>
 
         <div className="card stat-card">
-          <p>Earned Payouts</p>
-          <h3>${earnedTotal.toLocaleString()}</h3>
-          <span>Triggered when candidate is marked hired</span>
+          <p>Outstanding Payouts</p>
+          <h3>${outstandingTotal.toLocaleString()}</h3>
+          <span>Owed but not yet paid (earned + requested)</span>
         </div>
 
         <div className="card stat-card">
-          <p>Pending Payouts</p>
-          <h3>${pendingTotal.toLocaleString()}</h3>
-          <span>Awaiting hire status</span>
+          <p>Paid Out</p>
+          <h3>${paidTotal.toLocaleString()}</h3>
+          <span>Settled payouts to contributors</span>
         </div>
       </section>
 
@@ -144,7 +150,7 @@ export default function Referrals() {
                     <td>
                       <span
                         className={
-                          item.referral_payout_status === "earned"
+                          item.referral_payout_status === "paid"
                             ? "status-pill"
                             : "status-pill payout"
                         }

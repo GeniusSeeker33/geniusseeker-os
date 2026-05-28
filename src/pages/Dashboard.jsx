@@ -70,7 +70,11 @@ export default function Dashboard() {
       candidate.status !== "hired" && candidate.status !== "rejected"
   ).length;
   const earnedPayouts = candidates
-    .filter((candidate) => candidate.referral_payout_status === "earned")
+    .filter((candidate) =>
+      ["earned", "requested", "paid"].includes(
+        candidate.referral_payout_status
+      )
+    )
     .reduce(
       (sum, candidate) => sum + Number(candidate.referral_payout_amount || 0),
       0

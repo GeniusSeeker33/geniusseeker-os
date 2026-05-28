@@ -89,6 +89,52 @@ export default function Recruiting() {
     );
   }
 
+  async function updatePayout(id, newStatus, paymentReference) {
+    const { error } = await supabase
+      .from("candidate_applications")
+      .update({ referral_payout_status: newStatus })
+      .eq("id", id);
+
+    if (error) {
+      alert("Payout update failed: " + error.message);
+      return;
+    }
+
+    const verb =
+      newStatus === "requested"
+        ? "Payout requested"
+        : newStatus === "paid"
+          ? "Payout marked paid"
+          : `Payout status changed to ${newStatus}`;
+
+    const note = paymentReference
+      ? `${verb}. Reference: ${paymentReference}`
+      : `${verb}.`;
+
+    await supabase.from("candidate_activity").insert([
+      {
+        candidate_id: id,
+        activity_type: "payout_updated",
+        activity_note: note,
+        created_by: recruiterId,
+      },
+    ]);
+
+    setCandidates((prev) =>
+      prev.map((candidate) =>
+        candidate.id === id
+          ? { ...candidate, referral_payout_status: newStatus }
+          : candidate
+      )
+    );
+
+    setSelectedCandidate((prev) =>
+      prev && prev.id === id
+        ? { ...prev, referral_payout_status: newStatus }
+        : prev
+    );
+  }
+
   useEffect(() => {
     fetchCandidates();
   }, []);
@@ -212,7 +258,7 @@ export default function Recruiting() {
                     <td onClick={() => setSelectedCandidate(candidate)}>
                       <span
                         className={
-                          candidate.referral_payout_status === "earned"
+                          candidate.referral_payout_status === "paid"
                             ? "status-pill"
                             : "status-pill payout"
                         }
@@ -271,6 +317,7 @@ export default function Recruiting() {
           candidate={selectedCandidate}
           onClose={() => setSelectedCandidate(null)}
           onStatusChange={updateStatus}
+          onPayoutChange={updatePayout}
         />
       )}
     </>
@@ -427,11 +474,12 @@ function ManualImportForm({ onImported }) {
   );
 }
 
-function CandidateDrawer({ candidate, onClose, onStatusChange }) {
+function CandidateDrawer({ candidate, onClose, onStatusChange, onPayoutChange }) {
   const { user } = useAuth();
   const recruiterId = user?.email || "Recruiter";
   const [notes, setNotes] = useState(candidate.notes || "");
   const [saving, setSaving] = useState(false);
+  const [paymentReference, setPaymentReference] = useState("");
 
   async function saveNotes() {
     setSaving(true);
@@ -555,6 +603,63 @@ function CandidateDrawer({ candidate, onClose, onStatusChange }) {
             ))}
           </select>
         </label>
+
+        {Number(candidate.referral_payout_amount) > 0 && (
+          <div className="drawer-notes">
+            <h3>Referral Payout</h3>
+            <p>
+              <strong>${candidate.referral_payout_amount}</strong> —{" "}
+              <span
+                className={
+                  candidate.referral_payout_status === "paid"
+                    ? "status-pill"
+                    : "status-pill payout"
+                }
+              >
+                {formatPayoutStatus(candidate.referral_payout_status)}
+              </span>
+            </p>
+
+            {candidate.referral_payout_status === "earned" && (
+              <button
+                className="primary-btn"
+                style={{ marginTop: "12px" }}
+                onClick={() => onPayoutChange(candidate.id, "requested")}
+              >
+                Request Payout
+              </button>
+            )}
+
+            {candidate.referral_payout_status === "requested" && (
+              <div style={{ marginTop: "12px", display: "grid", gap: "10px" }}>
+                <label>
+                  Payment reference <span className="muted-small">(optional — e.g. Venmo TXN-1234)</span>
+                  <input
+                    value={paymentReference}
+                    onChange={(event) => setPaymentReference(event.target.value)}
+                    placeholder="Optional"
+                  />
+                </label>
+
+                <button
+                  className="primary-btn"
+                  onClick={() => {
+                    onPayoutChange(candidate.id, "paid", paymentReference.trim());
+                    setPaymentReference("");
+                  }}
+                >
+                  Mark Paid
+                </button>
+              </div>
+            )}
+
+            {candidate.referral_payout_status === "paid" && (
+              <p className="muted-small">
+                Payout completed. See activity timeline below for the audit trail.
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="drawer-notes">
           <h3>Recruiter Notes</h3>
