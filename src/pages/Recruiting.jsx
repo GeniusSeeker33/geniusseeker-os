@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import ContributorPicker from "../components/ContributorPicker";
+
+function contributorLabel(candidate) {
+  if (candidate?.contributor?.name) return candidate.contributor.name;
+  return candidate?.referred_by || "-";
+}
 
 const statuses = ["new", "screened", "interviewing", "offered", "hired", "rejected"];
 
@@ -25,7 +31,7 @@ export default function Recruiting() {
     const { data, error } = await supabase
       .from("candidate_applications")
       .select(
-        "id, first_name, last_name, email, phone, position_title, status, created_at, resume_path, source, notes, recruiter, referred_by, referral_payout_amount, referral_payout_status"
+        "id, first_name, last_name, email, phone, position_title, status, created_at, resume_path, source, notes, recruiter, referred_by, referred_by_id, referral_payout_amount, referral_payout_status, contributor:contributors!referred_by_id(id, name, email)"
       )
       .order("created_at", { ascending: false });
 
@@ -184,7 +190,7 @@ export default function Recruiting() {
                     <td onClick={() => setSelectedCandidate(candidate)}>{candidate.phone || "-"}</td>
                     <td onClick={() => setSelectedCandidate(candidate)}>{candidate.position_title || "-"}</td>
                     <td onClick={() => setSelectedCandidate(candidate)}>{candidate.source || "Join-Orion"}</td>
-                    <td onClick={() => setSelectedCandidate(candidate)}>{candidate.referred_by || "-"}</td>
+                    <td onClick={() => setSelectedCandidate(candidate)}>{contributorLabel(candidate)}</td>
 
                     <td>
                       <select
@@ -269,7 +275,7 @@ export default function Recruiting() {
 }
 
 function ManualImportForm({ onImported }) {
-  const [form, setForm] = useState({
+  const initialForm = {
     first_name: "",
     last_name: "",
     email: "",
@@ -277,11 +283,12 @@ function ManualImportForm({ onImported }) {
     position_title: "",
     source: "Indeed",
     recruiter: "",
-    referred_by: "",
     referral_payout_amount: 300,
     notes: "",
-  });
+  };
 
+  const [form, setForm] = useState(initialForm);
+  const [contributor, setContributor] = useState(null);
   const [loading, setLoading] = useState(false);
 
   function updateField(event) {
@@ -301,7 +308,8 @@ function ManualImportForm({ onImported }) {
       position_title: form.position_title.trim(),
       source: form.source,
       recruiter: form.recruiter.trim() || null,
-      referred_by: form.referred_by.trim() || null,
+      referred_by_id: contributor?.id || null,
+      referred_by: contributor?.name || null,
       referral_payout_amount: Number(form.referral_payout_amount) || 0,
       referral_payout_status: "not_earned",
       notes: form.notes.trim() || null,
@@ -316,19 +324,8 @@ function ManualImportForm({ onImported }) {
       return;
     }
 
-    setForm({
-      first_name: "",
-      last_name: "",
-      email: "",
-      phone: "",
-      position_title: "",
-      source: "Indeed",
-      recruiter: "",
-      referred_by: "",
-      referral_payout_amount: 300,
-      notes: "",
-    });
-
+    setForm(initialForm);
+    setContributor(null);
     setLoading(false);
     onImported?.();
   }
@@ -395,12 +392,7 @@ function ManualImportForm({ onImported }) {
 
         <label>
           Referred By
-          <input
-            name="referred_by"
-            value={form.referred_by}
-            onChange={updateField}
-            placeholder="Name of person who referred candidate"
-          />
+          <ContributorPicker value={contributor} onChange={setContributor} />
         </label>
 
         <label>
@@ -521,7 +513,7 @@ function CandidateDrawer({ candidate, onClose, onStatusChange }) {
 
           <div className="drawer-field">
             <span>Referred By</span>
-            <strong>{candidate.referred_by || "-"}</strong>
+            <strong>{contributorLabel(candidate)}</strong>
           </div>
 
           <div className="drawer-field">

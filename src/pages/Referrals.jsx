@@ -18,9 +18,9 @@ export default function Referrals() {
     const { data, error } = await supabase
       .from("candidate_applications")
       .select(
-        "id, first_name, last_name, email, phone, position_title, status, created_at, source, recruiter, referred_by, referral_payout_amount, referral_payout_status"
+        "id, first_name, last_name, email, phone, position_title, status, created_at, source, recruiter, referred_by, referred_by_id, referral_payout_amount, referral_payout_status, contributor:contributors!referred_by_id(id, name, email)"
       )
-      .not("referred_by", "is", null)
+      .or("referred_by_id.not.is.null,referred_by.not.is.null")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -123,7 +123,7 @@ export default function Referrals() {
               <tbody>
                 {referrals.map((item) => (
                   <tr key={item.id}>
-                    <td>{item.referred_by || "-"}</td>
+                    <td>{item.contributor?.name || item.referred_by || "-"}</td>
 
                     <td>
                       <strong>

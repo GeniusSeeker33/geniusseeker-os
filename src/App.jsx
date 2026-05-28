@@ -14,11 +14,16 @@ import CRM from "./pages/CRM";
 import Missions from "./pages/Missions";
 import Leaderboard from "./pages/Leaderboard";
 import Admin from "./pages/Admin";
+import ContributorSignup from "./pages/ContributorSignup";
+import ReferralLanding from "./pages/ReferralLanding";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/join" element={<ContributorSignup />} />
+        <Route path="/r/:contributorId" element={<ReferralLanding />} />
+
         <Route element={<MainLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/recruiting" element={<Recruiting />} />

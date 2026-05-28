@@ -534,3 +534,136 @@ td {
   display: grid;
   gap: 14px;
 }
+
+.contributor-picker {
+  position: relative;
+}
+
+.contributor-selected {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(143, 240, 210, 0.25);
+  background: rgba(143, 240, 210, 0.08);
+}
+
+.contributor-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  max-height: 260px;
+  overflow-y: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0f1422;
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+}
+
+.contributor-option {
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 12px 14px;
+  color: #f6f3ea;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.contributor-option:hover {
+  background: rgba(143, 240, 210, 0.08);
+}
+
+.contributor-add {
+  color: #8ff0d2;
+  font-weight: 800;
+  border-bottom: none;
+}
+
+.contributor-create {
+  margin-top: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(143, 240, 210, 0.18);
+  background: rgba(143, 240, 210, 0.06);
+  display: grid;
+  gap: 10px;
+}
+
+.contributor-create-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.public-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+  background:
+    radial-gradient(circle at top left, rgba(214, 176, 91, 0.18), transparent 32%),
+    linear-gradient(135deg, #090c14 0%, #121827 55%, #07080c 100%);
+}
+
+.public-card {
+  width: 100%;
+  max-width: 560px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  padding: 36px;
+  display: grid;
+  gap: 16px;
+}
+
+.public-card h1 {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 36px);
+}
+
+.public-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.public-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 520px) {
+  .public-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.referral-link-box {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(143, 240, 210, 0.25);
+  background: rgba(143, 240, 210, 0.08);
+}
+
+.referral-link-box code {
+  flex: 1;
+  overflow-wrap: anywhere;
+  color: #8ff0d2;
+  font-size: 14px;
+}
+
+.form-error {
+  color: #ff8b8b;
+  margin: 0;
+  font-size: 14px;
+}

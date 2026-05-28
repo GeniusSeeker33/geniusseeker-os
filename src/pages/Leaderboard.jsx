@@ -5,6 +5,19 @@ export default function Leaderboard() {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [copiedKey, setCopiedKey] = useState(null);
+
+  async function copyReferralLink(row) {
+    if (!row.contributorId) return;
+    const link = `${window.location.origin}/r/${row.contributorId}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiedKey(row.key);
+      setTimeout(() => setCopiedKey((prev) => (prev === row.key ? null : prev)), 2000);
+    } catch (err) {
+      alert("Could not copy link: " + err.message);
+    }
+  }
 
   async function fetchLeaderboardData() {
     setLoading(true);
@@ -13,9 +26,9 @@ export default function Leaderboard() {
     const { data, error } = await supabase
       .from("candidate_applications")
       .select(
-        "id, first_name, last_name, status, referred_by, referral_payout_amount, referral_payout_status, created_at"
+        "id, first_name, last_name, status, referred_by, referred_by_id, referral_payout_amount, referral_payout_status, created_at, contributor:contributors!referred_by_id(id, name, email)"
       )
-      .not("referred_by", "is", null);
+      .or("referred_by_id.not.is.null,referred_by.not.is.null");
 
     if (error) {
       setLoadError(error.message);
@@ -35,11 +48,19 @@ export default function Leaderboard() {
     const map = {};
 
     candidates.forEach((candidate) => {
-      const name = candidate.referred_by || "Unknown";
+      const key = candidate.referred_by_id
+        ? `id:${candidate.referred_by_id}`
+        : `text:${(candidate.referred_by || "Unknown").trim().toLowerCase()}`;
 
-      if (!map[name]) {
-        map[name] = {
-          name,
+      const displayName =
+        candidate.contributor?.name || candidate.referred_by || "Unknown";
+
+      if (!map[key]) {
+        map[key] = {
+          key,
+          name: displayName,
+          contributorId: candidate.referred_by_id || null,
+          legacy: !candidate.referred_by_id,
           referrals: 0,
           hires: 0,
           earnedPayouts: 0,
@@ -48,22 +69,22 @@ export default function Leaderboard() {
         };
       }
 
-      map[name].referrals += 1;
+      map[key].referrals += 1;
 
       if (candidate.status === "hired") {
-        map[name].hires += 1;
+        map[key].hires += 1;
       }
 
       if (candidate.referral_payout_status === "earned") {
-        map[name].earnedPayouts += Number(candidate.referral_payout_amount || 0);
+        map[key].earnedPayouts += Number(candidate.referral_payout_amount || 0);
       } else {
-        map[name].pendingPayouts += Number(candidate.referral_payout_amount || 0);
+        map[key].pendingPayouts += Number(candidate.referral_payout_amount || 0);
       }
 
-      map[name].contributionScore =
-        map[name].referrals * 10 +
-        map[name].hires * 50 +
-        Math.round(map[name].earnedPayouts / 10);
+      map[key].contributionScore =
+        map[key].referrals * 10 +
+        map[key].hires * 50 +
+        Math.round(map[key].earnedPayouts / 10);
     });
 
     return Object.values(map).sort(
@@ -143,17 +164,26 @@ export default function Leaderboard() {
                   <th>Earned Payouts</th>
                   <th>Pending Payouts</th>
                   <th>Contribution Score</th>
+                  <th>Referral Link</th>
                 </tr>
               </thead>
 
               <tbody>
                 {leaderboard.map((row, index) => (
-                  <tr key={row.name}>
+                  <tr key={row.key}>
                     <td>
                       <span className="status-pill">#{index + 1}</span>
                     </td>
                     <td>
                       <strong>{row.name}</strong>
+                      {row.legacy && (
+                        <>
+                          {" "}
+                          <span className="status-pill payout" title="Legacy free-text referral — not yet linked to a contributor record">
+                            Unlinked
+                          </span>
+                        </>
+                      )}
                     </td>
                     <td>{row.referrals}</td>
                     <td>{row.hires}</td>
@@ -161,6 +191,18 @@ export default function Leaderboard() {
                     <td>${row.pendingPayouts.toLocaleString()}</td>
                     <td>
                       <span className="score-pill">{row.contributionScore}</span>
+                    </td>
+                    <td>
+                      {row.contributorId ? (
+                        <button
+                          className="mini-btn"
+                          onClick={() => copyReferralLink(row)}
+                        >
+                          {copiedKey === row.key ? "Copied" : "Copy Link"}
+                        </button>
+                      ) : (
+                        <span className="muted-small">—</span>
+                      )}
                     </td>
                   </tr>
                 ))}
