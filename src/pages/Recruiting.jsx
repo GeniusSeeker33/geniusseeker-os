@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { useAuth } from "../lib/auth";
 import ContributorPicker from "../components/ContributorPicker";
 
 function contributorLabel(candidate) {
@@ -19,6 +20,8 @@ function formatPayoutStatus(status) {
 }
 
 export default function Recruiting() {
+  const { user } = useAuth();
+  const recruiterId = user?.email || "Recruiter";
   const [candidates, setCandidates] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -71,7 +74,7 @@ export default function Recruiting() {
           status === "hired"
             ? "Candidate marked hired. Referral payout earned."
             : `Candidate status changed to ${status}.`,
-        created_by: "Recruiter",
+        created_by: recruiterId,
       },
     ]);
 
@@ -425,6 +428,8 @@ function ManualImportForm({ onImported }) {
 }
 
 function CandidateDrawer({ candidate, onClose, onStatusChange }) {
+  const { user } = useAuth();
+  const recruiterId = user?.email || "Recruiter";
   const [notes, setNotes] = useState(candidate.notes || "");
   const [saving, setSaving] = useState(false);
 
@@ -447,7 +452,7 @@ function CandidateDrawer({ candidate, onClose, onStatusChange }) {
         candidate_id: candidate.id,
         activity_type: "notes_updated",
         activity_note: "Recruiter notes updated",
-        created_by: "Recruiter",
+        created_by: recruiterId,
       },
     ]);
 
@@ -461,7 +466,7 @@ function CandidateDrawer({ candidate, onClose, onStatusChange }) {
         candidate_id: candidate.id,
         activity_type: type,
         activity_note: note,
-        created_by: "Recruiter",
+        created_by: recruiterId,
       },
     ]);
 
@@ -623,7 +628,10 @@ function ActivityFeed({ candidateId }) {
             <div key={activity.id} className="activity-item">
               <strong>{activity.activity_type}</strong>
               <p>{activity.activity_note}</p>
-              <span>{new Date(activity.created_at).toLocaleString()}</span>
+              <span>
+                {new Date(activity.created_at).toLocaleString()}
+                {activity.created_by && <> · {activity.created_by}</>}
+              </span>
             </div>
           ))}
         </div>
