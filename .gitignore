@@ -29,3 +29,8 @@ create-tokens.js
 associate-tokens.js
 *.sqlite-shm
 *.sqlite-wal
+
+# Live reference checkouts — local working copies of in-production sites
+# (geniusseeker-build and join-orion.com). Do not commit; do not modify in place.
+app/
+join-orion-source/
