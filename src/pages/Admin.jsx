@@ -1,11 +1,9 @@
-export default function Recruiting() {
+export default function Admin() {
   return (
     <div className="card">
       <h2>Admin Module</h2>
 
-      <p>
-        Candidate pipelines, onboarding, and recruiter workflows will live here.
-      </p>
+      <p>User management, role assignments, and platform settings will live here.</p>
     </div>
   );
 }

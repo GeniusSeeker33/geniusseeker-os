@@ -1,11 +1,9 @@
-export default function Recruiting() {
+export default function Simulator() {
   return (
     <div className="card">
-      <h2>Simulator Module</h2>
+      <h2>Sales Simulator</h2>
 
-      <p>
-        Candidate pipelines, onboarding, and recruiter workflows will live here.
-      </p>
+      <p>Roleplay training and scoring for sales reps will live here.</p>
     </div>
   );
 }

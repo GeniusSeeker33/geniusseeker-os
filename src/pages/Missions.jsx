@@ -1,10 +1,11 @@
-export default function Recruiting() {
+export default function Missions() {
   return (
     <div className="card">
-      <h2>Missions Module</h2>
+      <h2>Marketing Missions</h2>
 
       <p>
-        Candidate pipelines, onboarding, and recruiter workflows will live here.
+        Contribution missions — audits, content submissions, training tasks —
+        will live here as Phase 2 of the contribution economy.
       </p>
     </div>
   );
