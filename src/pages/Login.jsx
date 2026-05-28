@@ -3,10 +3,10 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 
 export default function Login() {
-  const { user, loading, signInWithEmail } = useAuth();
+  const { user, loading, signIn } = useAuth();
   const [email, setEmail] = useState("");
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   if (loading) {
@@ -27,54 +27,24 @@ export default function Login() {
     event.preventDefault();
     setError("");
 
-    const trimmed = email.trim().toLowerCase();
-    if (!trimmed) {
-      setError("Email is required.");
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail || !password) {
+      setError("Email and password are required.");
       return;
     }
 
-    setSending(true);
-    const { error: signInError } = await signInWithEmail(trimmed);
-    setSending(false);
+    setSubmitting(true);
+    const { error: signInError } = await signIn(trimmedEmail, password);
+    setSubmitting(false);
 
     if (signInError) {
       setError(
-        signInError.message.includes("Signups not allowed")
-          ? "This email isn't authorized. Ask an admin to invite you."
+        signInError.message.toLowerCase().includes("invalid login credentials")
+          ? "Invalid email or password."
           : signInError.message
       );
       return;
     }
-
-    setSent(true);
-  }
-
-  if (sent) {
-    return (
-      <div className="public-shell">
-        <div className="public-card">
-          <p className="eyebrow">Check your email</p>
-          <h1>Magic link sent.</h1>
-          <p className="muted-small">
-            We emailed a sign-in link to <strong>{email}</strong>. Click it to
-            access the OS. The link expires in 1 hour.
-          </p>
-          <p className="muted-small">
-            Wrong email or didn't get it?{" "}
-            <button
-              type="button"
-              className="link-btn"
-              onClick={() => {
-                setSent(false);
-                setEmail("");
-              }}
-            >
-              Try again
-            </button>
-          </p>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -83,8 +53,7 @@ export default function Login() {
         <p className="eyebrow">Recruiter Sign In</p>
         <h1>GeniusSeeker OS</h1>
         <p className="muted-small">
-          Enter your authorized email and we'll send you a one-time sign-in
-          link.
+          Sign in with your recruiter credentials.
         </p>
 
         <form onSubmit={handleSubmit} className="public-form">
@@ -99,10 +68,20 @@ export default function Login() {
             />
           </label>
 
+          <label>
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+            />
+          </label>
+
           {error && <p className="form-error">{error}</p>}
 
-          <button className="primary-btn" type="submit" disabled={sending}>
-            {sending ? "Sending..." : "Send Magic Link"}
+          <button className="primary-btn" type="submit" disabled={submitting}>
+            {submitting ? "Signing in..." : "Sign In"}
           </button>
         </form>
       </div>

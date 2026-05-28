@@ -22,14 +22,8 @@ export function AuthProvider({ children }) {
     return () => subscription.subscription.unsubscribe();
   }, []);
 
-  async function signInWithEmail(email) {
-    return supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: false,
-        emailRedirectTo: `${window.location.origin}/`,
-      },
-    });
+  async function signIn(email, password) {
+    return supabase.auth.signInWithPassword({ email, password });
   }
 
   async function signOut() {
@@ -40,7 +34,7 @@ export function AuthProvider({ children }) {
     session,
     user: session?.user || null,
     loading,
-    signInWithEmail,
+    signIn,
     signOut,
   };
 
