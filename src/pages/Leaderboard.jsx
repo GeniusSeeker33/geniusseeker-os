@@ -101,7 +101,7 @@ export default function Leaderboard() {
       <header className="topbar">
         <div>
           <p className="eyebrow">Contribution Leaderboard</p>
-          <h2>Rank referrers by talent contribution, hires, and payout value.</h2>
+          <h2>Rank recruiters by talent referred, hires, and payout value.</h2>
         </div>
 
         <button className="primary-btn" onClick={fetchLeaderboardData}>
@@ -111,9 +111,9 @@ export default function Leaderboard() {
 
       <section className="grid stats-grid">
         <div className="card stat-card">
-          <p>Total Referrers</p>
+          <p>Total Recruiters</p>
           <h3>{loading ? "..." : leaderboard.length}</h3>
-          <span>People contributing candidates</span>
+          <span>People referring candidates</span>
         </div>
 
         <div className="card stat-card">
@@ -140,7 +140,7 @@ export default function Leaderboard() {
 
       <section className="card">
         <div className="section-header">
-          <h3>Top Talent Contributors</h3>
+          <h3>Top Recruiters</h3>
           <p>
             Contribution score = referrals, hires, and earned payout value.
           </p>
@@ -179,7 +179,7 @@ export default function Leaderboard() {
                       {row.legacy && (
                         <>
                           {" "}
-                          <span className="status-pill payout" title="Legacy free-text referral — not yet linked to a contributor record">
+                          <span className="status-pill payout" title="Legacy free-text referral — not yet linked to a recruiter record">
                             Unlinked
                           </span>
                         </>

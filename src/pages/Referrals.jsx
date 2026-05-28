@@ -86,7 +86,7 @@ export default function Referrals() {
         <div className="card stat-card">
           <p>Paid Out</p>
           <h3>${paidTotal.toLocaleString()}</h3>
-          <span>Settled payouts to contributors</span>
+          <span>Settled payouts to recruiters</span>
         </div>
       </section>
 

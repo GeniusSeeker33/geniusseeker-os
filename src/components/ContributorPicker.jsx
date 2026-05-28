@@ -70,7 +70,7 @@ export default function ContributorPicker({ value, onChange }) {
   async function saveNewContributor() {
     const name = newContributor.name.trim();
     if (!name) {
-      alert("Contributor name is required");
+      alert("Recruiter name is required");
       return;
     }
 
@@ -91,7 +91,7 @@ export default function ContributorPicker({ value, onChange }) {
     setSaving(false);
 
     if (error) {
-      alert("Could not save contributor: " + error.message);
+      alert("Could not save recruiter: " + error.message);
       return;
     }
 
@@ -131,7 +131,7 @@ export default function ContributorPicker({ value, onChange }) {
         <div className="contributor-dropdown">
           {loadError && (
             <p className="muted-small" style={{ padding: "10px" }}>
-              Could not load contributors: {loadError}
+              Could not load recruiters: {loadError}
             </p>
           )}
 
@@ -150,7 +150,7 @@ export default function ContributorPicker({ value, onChange }) {
           ) : (
             <p className="muted-small" style={{ padding: "10px" }}>
               {contributors.length === 0
-                ? "No contributors yet."
+                ? "No recruiters yet."
                 : "No matches."}
             </p>
           )}
@@ -160,7 +160,7 @@ export default function ContributorPicker({ value, onChange }) {
             className="contributor-option contributor-add"
             onClick={startCreate}
           >
-            + Add new contributor{query.trim() ? ` "${query.trim()}"` : ""}
+            + Add new recruiter{query.trim() ? ` "${query.trim()}"` : ""}
           </button>
         </div>
       )}
@@ -217,7 +217,7 @@ export default function ContributorPicker({ value, onChange }) {
               onClick={saveNewContributor}
               disabled={saving}
             >
-              {saving ? "Saving..." : "Save Contributor"}
+              {saving ? "Saving..." : "Save Recruiter"}
             </button>
           </div>
         </div>

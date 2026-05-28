@@ -104,8 +104,8 @@ export default function ContributorSignup() {
   return (
     <div className="public-shell">
       <div className="public-card">
-        <p className="eyebrow">Become a contributor</p>
-        <h1>Join the GeniusSeeker referral network.</h1>
+        <p className="eyebrow">Become a recruiter</p>
+        <h1>Join the GeniusSeeker recruiter network.</h1>
         <p className="muted-small">
           Refer talent to Orion roles and earn payouts when your referrals get
           hired. Sign up below to get your personal referral link.

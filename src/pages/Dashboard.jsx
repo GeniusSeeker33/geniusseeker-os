@@ -83,7 +83,7 @@ export default function Dashboard() {
   const stats = [
     { label: "Total Candidates", value: totalCandidates },
     { label: "Active Pipeline", value: activePipeline },
-    { label: "Contributors", value: contributorCount },
+    { label: "Recruiters", value: contributorCount },
     {
       label: "Earned Payouts",
       value: `$${earnedPayouts.toLocaleString()}`,
