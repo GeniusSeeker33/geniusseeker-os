@@ -699,3 +699,196 @@ td {
   margin: 0;
   overflow-wrap: anywhere;
 }
+
+/* Public marketing shell (Corporate Rewards) */
+.marketing-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(214, 176, 91, 0.18), transparent 32%),
+    linear-gradient(135deg, #090c14 0%, #121827 55%, #07080c 100%);
+}
+
+.marketing-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 22px clamp(20px, 5vw, 56px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.marketing-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #f6f3ea;
+}
+
+.marketing-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #d6b05b, #8ff0d2);
+  color: #081018;
+  font-weight: 900;
+}
+
+.marketing-brand strong {
+  display: block;
+  font-size: 17px;
+}
+
+.marketing-brand small {
+  color: #aeb7c8;
+}
+
+.marketing-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 56px) clamp(20px, 5vw, 56px);
+  display: grid;
+  gap: 22px;
+}
+
+.marketing-hero {
+  text-align: center;
+  padding: clamp(20px, 4vw, 40px) 0 12px;
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+}
+
+.marketing-hero h1 {
+  margin: 0;
+  font-size: clamp(30px, 5vw, 54px);
+  max-width: 900px;
+  line-height: 1.1;
+}
+
+.marketing-lede {
+  color: #dbe3f3;
+  font-size: clamp(16px, 2vw, 19px);
+  line-height: 1.6;
+  max-width: 720px;
+  margin: 0;
+}
+
+.marketing-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+}
+
+.marketing-hero-actions .primary-btn {
+  text-decoration: none;
+}
+
+.marketing-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.marketing-cta h3 {
+  margin: 6px 0 0;
+  font-size: clamp(22px, 3vw, 30px);
+}
+
+.marketing-cta .primary-btn {
+  text-decoration: none;
+}
+
+.marketing-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 24px clamp(20px, 5vw, 56px);
+  text-align: center;
+}
+
+/* Corporate Rewards / Membership */
+.tier-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.tier-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.tier-card.featured {
+  border-color: rgba(214, 176, 91, 0.55);
+  box-shadow: 0 24px 70px rgba(214, 176, 91, 0.18);
+  background: rgba(214, 176, 91, 0.08);
+}
+
+.tier-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.tier-price {
+  margin: 6px 0 4px;
+  font-size: 30px;
+}
+
+.tier-dollars {
+  color: #d6b05b;
+  font-weight: 800;
+  margin: 0 0 16px;
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.feature-list li {
+  position: relative;
+  padding-left: 22px;
+  color: #dbe3f3;
+  line-height: 1.5;
+}
+
+.feature-list li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  color: #8ff0d2;
+}
+
+.economy-card h3 {
+  margin: 10px 0 8px;
+  font-size: 22px;
+  color: #d6b05b;
+}
+
+.economy-card p {
+  color: #dbe3f3;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.economy-paragraph {
+  color: #dbe3f3;
+  line-height: 1.7;
+  max-width: 760px;
+  margin: 0;
+  font-size: 16px;
+}
+
+@media (max-width: 900px) {
+  .tier-grid {
+    grid-template-columns: 1fr;
+  }
+}
