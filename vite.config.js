@@ -40,6 +40,7 @@ export default defineConfig({
         testimonials:     "testimonials.html",
         privacy:          "privacy-policy.html",
         platform:         "platform.html",
+        membership:       "membership.html",
         profile:          "profile.html",
         connectIdentity:  "connect-identity.html",
         adminEmployers:   "admin-employers.html",
