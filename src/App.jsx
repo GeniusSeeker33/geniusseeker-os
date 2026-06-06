@@ -15,6 +15,7 @@ import Simulator from "./pages/Simulator";
 import CRM from "./pages/CRM";
 import Missions from "./pages/Missions";
 import Leaderboard from "./pages/Leaderboard";
+import Membership from "./pages/Membership";
 import Admin from "./pages/Admin";
 import ContributorSignup from "./pages/ContributorSignup";
 import ReferralLanding from "./pages/ReferralLanding";
@@ -27,6 +28,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/join" element={<ContributorSignup />} />
+          <Route path="/membership" element={<Membership />} />
           <Route path="/r/:contributorId" element={<ReferralLanding />} />
 
           <Route element={<RequireAuth />}>
